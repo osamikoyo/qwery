@@ -21,16 +21,16 @@ gboolean update_timer(gpointer data) {
     gtk_label_set_text(timer_data->timer_label, time_str);
     g_free(time_str);
 
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer(timer_data->text_view);
-    GtkTextIter start, end;
-
-    gtk_text_buffer_get_start_iter(buffer, &start);
-    gtk_text_buffer_get_end_iter(buffer, &end);
-    gchar *text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
-    g_print("Содержимое text_view: %s\n", text);
-    g_free(text);
 
     if (timer_data->seconds >= 30) {
+        GtkTextBuffer *buffer = gtk_text_view_get_buffer(timer_data->text_view);
+        GtkTextIter start, end;
+
+        gtk_text_buffer_get_start_iter(buffer, &start);
+        gtk_text_buffer_get_end_iter(buffer, &end);
+        gchar *text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+        g_print("Содержимое text_view: %s\n", text);
+        g_free(text);
         char text_buffer_label[50];
 
         int _ = sprintf(text_buffer_label, "Ваша скорость - %f", get_count((char *)text));
