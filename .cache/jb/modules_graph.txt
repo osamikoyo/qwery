@@ -1,0 +1,4 @@
+1
+0
+{"Hash":"","Name":"","Path":"/home/osami/Документы/code/c/qwerty/src/main.c"}
+0
