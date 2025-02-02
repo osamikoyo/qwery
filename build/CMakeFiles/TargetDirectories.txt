@@ -1,3 +1,0 @@
-/home/osami/Документы/code/c/qwerty/build/CMakeFiles/cwindow.dir
-/home/osami/Документы/code/c/qwerty/build/CMakeFiles/edit_cache.dir
-/home/osami/Документы/code/c/qwerty/build/CMakeFiles/rebuild_cache.dir

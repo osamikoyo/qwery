@@ -1,14 +1,18 @@
 #include <gtk/gtk.h>
-#include "text.h"
 
 typedef struct {
     GtkLabel *label;
     GtkTextView *text_view;
     GtkLabel *timer_label;
     GtkFixed *fixed;
+    GtkTextBuffer *buffer;
     guint timer_id;
     gint seconds;
 } ClickedUserData;
+
+void on_insert_text(GtkTextBuffer *buffer, GtkTextIter *location, gchar *text, gint length, gpointer user_data) {
+    g_print("Введен текст: %.*s\n", length, text);
+}
 
 gboolean update_timer(gpointer data) {
     ClickedUserData *timer_data = (ClickedUserData *)data;
@@ -22,20 +26,24 @@ gboolean update_timer(gpointer data) {
     g_free(time_str);
 
 
-    if (timer_data->seconds >= 30) {
-        GtkTextBuffer *buffer = gtk_text_view_get_buffer(timer_data->text_view);
+    if (timer_data->seconds >= 20) {
+        GtkTextBuffer *buffer = timer_data->buffer;
         GtkTextIter start, end;
 
         gtk_text_buffer_get_start_iter(buffer, &start);
         gtk_text_buffer_get_end_iter(buffer, &end);
         gchar *text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
         g_print("Содержимое text_view: %s\n", text);
-        g_free(text);
+
+        int text_length = strlen(text);
+
+        float time_in_minutes = (float)timer_data->seconds / 60.0f;
+        float speed_cpm = (float)text_length / time_in_minutes;
+
         char text_buffer_label[50];
+        sprintf(text_buffer_label, "<span weight=\"bold\" font=\"Verdana 16\">Ваша скорость: %.2f CPM</span>", speed_cpm);
 
-        int _ = sprintf(text_buffer_label, "Ваша скорость - %f", get_count((char *)text));
-
-        g_print("Таймер истек - 5 минут пройдено!\n");
+        g_print("Таймер истек - 20 секунд пройдено!\n");
 
         GtkWidget *dialog = gtk_message_dialog_new(NULL,
                                                    GTK_DIALOG_MODAL,
@@ -43,14 +51,19 @@ gboolean update_timer(gpointer data) {
                                                    GTK_BUTTONS_OK,
                                                    "Время истекло!");
 
-        GtkWidget *new_label = gtk_label_new(text_buffer_label);
-        gtk_fixed_put(timer_data->fixed, new_label, 20, 10);
+        GtkWidget *new_label = gtk_label_new(NULL);
+        gtk_label_set_markup(GTK_LABEL(new_label), text_buffer_label);
+
+        gtk_fixed_put(timer_data->fixed, new_label, 300, 100);
         gtk_widget_show(new_label);
 
         gtk_dialog_run(GTK_DIALOG(dialog));
         gtk_widget_destroy(dialog);
 
+        g_free(text);
+
         return FALSE;
+
     }
     return TRUE;
 }
@@ -71,6 +84,7 @@ static void app_activate(GApplication *app, gpointer user_data) {
     GtkWidget *text_view = gtk_text_view_new();
     GtkWidget *label = gtk_label_new("Buffer Label");
     GtkWidget *timer_label = gtk_label_new("0:00");
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
 
     gtk_window_set_title(GTK_WINDOW(window), "helooo");
     gtk_window_set_default_size(GTK_WINDOW(window), 500, 400);
@@ -80,10 +94,12 @@ static void app_activate(GApplication *app, gpointer user_data) {
     data->text_view = GTK_TEXT_VIEW(text_view);
     data->timer_label = GTK_LABEL(timer_label);
     data->fixed = GTK_FIXED(fixed);
+    data->buffer = GTK_TEXT_BUFFER(buffer);
     data->timer_id = 0;
     data->seconds = 0;
 
     g_signal_connect(start_button, "clicked", G_CALLBACK(started_clicked), data);
+    g_signal_connect(buffer, "insert-text", G_CALLBACK(on_insert_text), NULL);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_fixed_put(GTK_FIXED(fixed), start_button, 200, 1);
