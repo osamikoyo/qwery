@@ -1,5 +1,7 @@
 #include <gtk/gtk.h>
 
+#include "words.h"
+
 typedef struct {
     GtkLabel *label;
     GtkTextView *text_view;
@@ -11,7 +13,13 @@ typedef struct {
 } ClickedUserData;
 
 void on_insert_text(GtkTextBuffer *buffer, GtkTextIter *location, gchar *text, gint length, gpointer user_data) {
-    g_print("Введен текст: %.*s\n", length, text);
+    GtkLabel *label = (GtkLabel *)user_data;
+
+    if (strcmp(text, " ") == 0) {
+        gtk_label_set_label(label, get_random_word());
+    }
+
+    g_print("Введен текст: %.*s Рандомное слово: %s\n", length, text,get_random_word());
 }
 
 gboolean update_timer(gpointer data) {
@@ -99,7 +107,7 @@ static void app_activate(GApplication *app, gpointer user_data) {
     data->seconds = 0;
 
     g_signal_connect(start_button, "clicked", G_CALLBACK(started_clicked), data);
-    g_signal_connect(buffer, "insert-text", G_CALLBACK(on_insert_text), NULL);
+    g_signal_connect(buffer, "insert-text", G_CALLBACK(on_insert_text), GTK_LABEL(label));
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_fixed_put(GTK_FIXED(fixed), start_button, 200, 1);
