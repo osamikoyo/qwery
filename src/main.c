@@ -6,6 +6,7 @@ typedef struct {
     GtkLabel *label;
     GtkTextView *text_view;
     GtkLabel *timer_label;
+    GtkLabel *random_word_label;
     GtkFixed *fixed;
     GtkTextBuffer *buffer;
     guint timer_id;
@@ -79,7 +80,10 @@ gboolean update_timer(gpointer data) {
 static void started_clicked(GtkButton *btn, gpointer user_data) {
     ClickedUserData *data = (ClickedUserData*)user_data;
 
+    gtk_fixed_put(data->fixed, GTK_WIDGET(data->random_word_label), 30, 20);
+
     data->seconds = 0;
+    gtk_widget_show(GTK_WIDGET(data->random_word_label));
     gtk_label_set_text(data->timer_label, "0:00");
 
     data->timer_id = g_timeout_add(1000, update_timer, data);
@@ -92,6 +96,7 @@ static void app_activate(GApplication *app, gpointer user_data) {
     GtkWidget *text_view = gtk_text_view_new();
     GtkWidget *label = gtk_label_new("Buffer Label");
     GtkWidget *timer_label = gtk_label_new("0:00");
+    GtkWidget *random_word_label = gtk_label_new((gchar *)get_random_word());
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
 
     gtk_window_set_title(GTK_WINDOW(window), "helooo");
@@ -101,13 +106,14 @@ static void app_activate(GApplication *app, gpointer user_data) {
     data->label = GTK_LABEL(label);
     data->text_view = GTK_TEXT_VIEW(text_view);
     data->timer_label = GTK_LABEL(timer_label);
+    data->random_word_label = GTK_LABEL(random_word_label);
     data->fixed = GTK_FIXED(fixed);
     data->buffer = GTK_TEXT_BUFFER(buffer);
     data->timer_id = 0;
     data->seconds = 0;
 
     g_signal_connect(start_button, "clicked", G_CALLBACK(started_clicked), data);
-    g_signal_connect(buffer, "insert-text", G_CALLBACK(on_insert_text), GTK_LABEL(label));
+    g_signal_connect(buffer, "insert-text", G_CALLBACK(on_insert_text), GTK_LABEL(random_word_label));
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_fixed_put(GTK_FIXED(fixed), start_button, 200, 1);
