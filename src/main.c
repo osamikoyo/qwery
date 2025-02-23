@@ -13,14 +13,14 @@ typedef struct {
     gint seconds;
 } ClickedUserData;
 
+static uint16_t simbol_count;
+
 void on_insert_text(GtkTextBuffer *buffer, GtkTextIter *location, gchar *text, gint length, gpointer user_data) {
     GtkLabel *label = (GtkLabel *)user_data;
-
+    simbol_count++;
     if (strcmp(text, " ") == 0) {
         gtk_label_set_label(label, get_random_word());
     }
-
-    g_print("Введен текст: %.*s Рандомное слово: %s\n", length, text,get_random_word());
 }
 
 gboolean update_timer(gpointer data) {
@@ -44,10 +44,8 @@ gboolean update_timer(gpointer data) {
         gchar *text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
         g_print("Содержимое text_view: %s\n", text);
 
-        int text_length = strlen(text);
-
         float time_in_minutes = (float)timer_data->seconds / 60.0f;
-        float speed_cpm = (float)text_length / time_in_minutes;
+        float speed_cpm = (float)simbol_count / time_in_minutes;
 
         char text_buffer_label[50];
         sprintf(text_buffer_label, "<span weight=\"bold\" font=\"Verdana 16\">Ваша скорость: %.2f CPM</span>", speed_cpm);
@@ -84,7 +82,7 @@ static void started_clicked(GtkButton *btn, gpointer user_data) {
 
     data->seconds = 0;
     gtk_widget_show(GTK_WIDGET(data->random_word_label));
-    gtk_label_set_text(data->timer_label, "0:00");
+    gtk_label_set_text(data->timer_label, "0.0");
 
     data->timer_id = g_timeout_add(1000, update_timer, data);
 }
@@ -118,10 +116,10 @@ static void app_activate(GApplication *app, gpointer user_data) {
 
     gtk_fixed_put(GTK_FIXED(fixed), start_button, 200, 1);
     gtk_fixed_put(GTK_FIXED(fixed), label, 200, 40);
-    gtk_fixed_put(GTK_FIXED(fixed), text_view, 10, 200);
+    gtk_fixed_put(GTK_FIXED(fixed), text_view, 120, 200);
     gtk_fixed_put(GTK_FIXED(fixed), timer_label, 240, 100);
 
-    gtk_widget_set_size_request(text_view, 100, 50);
+    gtk_widget_set_size_request(text_view, 300, 40);
 
     gtk_container_add(GTK_CONTAINER(window), fixed);
     gtk_widget_show_all(window);
